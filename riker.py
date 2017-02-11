@@ -23,6 +23,7 @@ class TcpControlMixin(object):
     def __init__(self, ip_address=None, port=8102, **kwargs):
         if not ip_address:
             raise TypeError
+        self.tcp_state = {}
         self.connected = False
         self.ip_address = ip_address
         self.port = port
@@ -33,7 +34,20 @@ class TcpControlMixin(object):
     tcp_command_map = {
         'KEY_VOLUMEUP': 'VU',
         'KEY_VOLUMEDOWN': 'VD',
+        'KEY_MUTE': 'MUTE',
     }
+
+    tcp_toggle_commands = {
+        'MUTE': {
+            False: 'MO',
+            True: 'MF',
+        }
+    }
+
+    def get_tcp_toggle_state(self, command):
+        state = self.tcp_state.get(command, False)
+        self.tcp_state[command] = not state
+        return self.tcp_toggle_commands[command][state]
 
     def connect_tcp(self):
         self._tcpsock = socket.socket()
@@ -46,6 +60,8 @@ class TcpControlMixin(object):
         self._tcpsock.send(command)
 
     def execute_tcp_command(self, command):
+        if command in self.tcp_toggle_commands:
+            command = self.get_tcp_toggle_state(command)
         command = command + '\r\n'
         encoded = command.encode('ascii')
         self.send_tcp_command(encoded)
@@ -55,6 +71,7 @@ class RemoteCommand(LircCodeReaderMixin, TcpControlMixin, object):
 
     def __init__(self, **kwargs):
         self.command_map = {}
+        self.state = {}
         super(RemoteCommand, self).__init__(**kwargs)
 
     def update_command_map(self, command_method, mapping):
