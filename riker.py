@@ -3,6 +3,7 @@ import socket
 from functools import partial
 
 import lirc
+import serial
 
 class LircCodeReaderMixin(object):
 
@@ -57,7 +58,11 @@ class TcpControlMixin(object):
     def send_tcp_command(self, command):
         if not self.connected:
             self.connect_tcp()
-        self._tcpsock.send(command)
+        try:
+            self._tcpsock.send(command)
+        except BrokenPipeError:
+            self.connected = False
+            self.send_tcp_command(command)
 
     def execute_tcp_command(self, command):
         if command in self.tcp_toggle_commands:
@@ -67,7 +72,24 @@ class TcpControlMixin(object):
         self.send_tcp_command(encoded)
 
 
-class RemoteCommand(LircCodeReaderMixin, TcpControlMixin, object):
+class SerialControlMixin(object):
+
+    def __init__(self, serial_port=None, **kwargs):
+        if not serial_port:
+            raise TypeError
+        self.ser = serial.Serial(serial_port, baudrate=9600, bytesize=8, timeout=3)
+        self.update_command_map(self.send_serial_command, self.serial_command_map)
+        super(SerialControlMixin, self).__init__(**kwargs)
+
+    serial_command_map = {
+        'KEY_HOME': [0x08, 0x22, 0x00, 0x00, 0x00, 0x00, 0xd6]
+    }
+
+    def send_serial_command(self, command):
+        self.ser.write(command)
+
+
+class RemoteCommand(LircCodeReaderMixin, TcpControlMixin, SerialControlMixin, object):
 
     def __init__(self, **kwargs):
         self.command_map = {}
@@ -85,5 +107,6 @@ class RemoteCommand(LircCodeReaderMixin, TcpControlMixin, object):
 if __name__ == '__main__':
     tcp_receiver = os.environ['RIKER_TCP_RECEIVER_ADDRESS']
     lirc_name = os.environ['RIKER_LIRC_NAME']
-    commander = RemoteCommand(name=lirc_name, ip_address=tcp_receiver)
+    serial_port = os.environ['RIKER_SERIAL_PORT']
+    commander = RemoteCommand(name=lirc_name, ip_address=tcp_receiver, serial_port=serial_port)
     commander.run()
