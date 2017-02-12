@@ -114,7 +114,7 @@ class CecControlMixin(object):
             source=self.cec_source_id,
             sink=self.cec_sink_id,
             command=command
-        )
+        ).encode('ascii')
         self.cec_client.communicate(full_command)
 
 
