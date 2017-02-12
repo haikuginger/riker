@@ -1,6 +1,7 @@
 import os
 import socket
 from functools import partial
+from subprocess import Popen, PIPE, STDOUT
 
 import lirc
 import serial
@@ -89,7 +90,35 @@ class SerialControlMixin(object):
         self.ser.write(command)
 
 
-class RemoteCommand(LircCodeReaderMixin, TcpControlMixin, SerialControlMixin, object):
+class CecControlMixin(object):
+
+    cec_command_map = {
+        'KEY_UP': '01',
+        'KEY_DOWN': '02',
+        'KEY_RIGHT': '04',
+        'KEY_LEFT': '03',
+        'KEY_SELECT': '00',
+    }
+
+    def __init__(self, source_id=1, sink_id=None, **kwargs):
+        if not sink_id:
+            raise TypeError
+        self.cec_source_id = source_id
+        self.cec_sink_id = sink_id
+        self.cec_client = subprocess.Popen(['cec-client'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        self.update_command_map(self.send_cec_command, self.cec_command_map)
+        super(CecControlMixin, self).__init__(**kwargs)
+
+    def send_cec_command(self, command):
+        full_command = 'tx {source}{sink}:44:{command} \n tx {source}{sink}:45 \n'.format(
+            source=self.cec_sourse_id,
+            sink=self.cec_sink_id,
+            command=command
+        )
+        self.cec_client.communicate(full_command)
+
+
+class RemoteCommand(LircCodeReaderMixin, TcpControlMixin, SerialControlMixin, CecControlMixin, object):
 
     def __init__(self, **kwargs):
         self.command_map = {}
@@ -108,5 +137,11 @@ if __name__ == '__main__':
     tcp_receiver = os.environ['RIKER_TCP_RECEIVER_ADDRESS']
     lirc_name = os.environ['RIKER_LIRC_NAME']
     serial_port = os.environ['RIKER_SERIAL_PORT']
-    commander = RemoteCommand(name=lirc_name, ip_address=tcp_receiver, serial_port=serial_port)
+    cec_target = os.environ['RIKER_CEC_TARGET_ID']
+    commander = RemoteCommand(
+        name=lirc_name,
+        ip_address=tcp_receiver,
+        serial_port=serial_port,
+        sink_id=cec_target,
+    )
     commander.run()
