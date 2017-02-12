@@ -111,7 +111,7 @@ class CecControlMixin(object):
 
     def send_cec_command(self, command):
         full_command = 'tx {source}{sink}:44:{command} \n tx {source}{sink}:45 \n'.format(
-            source=self.cec_sourse_id,
+            source=self.cec_source_id,
             sink=self.cec_sink_id,
             command=command
         )
