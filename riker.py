@@ -115,7 +115,7 @@ class CecControlMixin(object):
             sink=self.cec_sink_id,
             command=command
         ).encode('ascii')
-        self.cec_client.communicate(full_command)
+        self.cec_client.stdin.write(full_command)
 
 
 class RemoteCommand(LircCodeReaderMixin, TcpControlMixin, SerialControlMixin, CecControlMixin, object):
