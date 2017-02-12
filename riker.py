@@ -105,7 +105,14 @@ class CecControlMixin(object):
             raise TypeError
         self.cec_source_id = source_id
         self.cec_sink_id = sink_id
-        self.cec_client = Popen(['cec-client'], stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True)
+        self.cec_client = Popen(
+            ['cec-client'],
+            stdin=PIPE,
+            stdout=PIPE,
+            stderr=PIPE,
+            buffsize=1,
+            universal_newlines=True,
+        )
         self.update_command_map(self.send_cec_command, self.cec_command_map)
         super(CecControlMixin, self).__init__(**kwargs)
 
@@ -114,7 +121,7 @@ class CecControlMixin(object):
             source=self.cec_source_id,
             sink=self.cec_sink_id,
             command=command
-        ).encode('ascii')
+        )
         self.cec_client.stdin.write(full_command)
 
 
