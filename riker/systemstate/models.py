@@ -50,6 +50,7 @@ class Command(models.Model):
         'State',
         related_name='+',
         null=True,
+        blank=True,
     )
 
     def execute(self):
