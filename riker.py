@@ -118,6 +118,19 @@ class CecControlMixin(object):
         'KEY_RIGHT': '04',
         'KEY_LEFT': '03',
         'KEY_SELECT': '00',
+        'KEY_BACK': '0D',
+        'KEY_MENU': '71',
+        'KEY_SUBTITLE': '72',
+        'KEY_PVR': '73',
+        'KEY_HOME': '09',
+        'KEY_CHANNELUP': '37',
+        'KEY_CHANNELDOWN': '38',
+        'KEY_PLAYPAUSE': '61',
+        'KEY_FASTFORWARD': '49',
+        'KEY_REWIND': '48',
+        'KEY_STOP': '45',
+        'KEY_NEXTSONG': '4B',
+        'KEY_PREVIOUSSONG': '4C',
     }
 
     def __init__(self, source_id=1, sink_id=None, **kwargs):
