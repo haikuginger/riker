@@ -2,15 +2,35 @@ import os
 import socket
 from functools import partial
 from subprocess import Popen, PIPE, STDOUT
+from uuid import uuid4
 
 import lirc
 import serial
 
+LIRCRC_TEMPLATE = """
+begin
+        prog   = {lirc_name}
+        button = {key_name}
+        config = {key_name}
+end
+
+"""
+
 class LircCodeReaderMixin(object):
 
-    def __init__(self, name='PyLirc', config='~/.lircrc', **kwargs):
+    def __init__(self, name='PyLirc', **kwargs):
         self.name = name
+        config = uuid4().hex
         self.config = config
+        with open(self.config, 'w') as configfile:
+            configfile.write(
+                '\n'.join(
+                    LIRCRC_TEMPLATE.format(
+                        lirc_name=self.name,
+                        key_name=key_name
+                    ) for key_name in self.command_map
+                )
+            )
         lirc.init(self.name, self.config)
         super(LircCodeReaderMixin, self).__init__(**kwargs)
 
@@ -125,7 +145,7 @@ class CecControlMixin(object):
         self.cec_client.stdin.write(full_command)
 
 
-class RemoteCommand(LircCodeReaderMixin, TcpControlMixin, SerialControlMixin, CecControlMixin, object):
+class RemoteCommand(TcpControlMixin, SerialControlMixin, CecControlMixin, LircCodeReaderMixin, object):
 
     def __init__(self, **kwargs):
         self.command_map = {}
