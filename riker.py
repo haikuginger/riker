@@ -125,7 +125,7 @@ class CecControlMixin(object):
         'KEY_HOME': '09',
         'KEY_CHANNELUP': '37',
         'KEY_CHANNELDOWN': '38',
-        'KEY_PLAYPAUSE': '61',
+        'KEY_PLAYPAUSE': '44',
         'KEY_FASTFORWARD': '49',
         'KEY_REWIND': '48',
         'KEY_STOP': '45',
