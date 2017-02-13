@@ -130,7 +130,7 @@ class CecControlMixin(object):
             stdin=PIPE,
             stdout=PIPE,
             stderr=PIPE,
-            buffsize=1,
+            bufsize=1,
             universal_newlines=True,
         )
         self.update_command_map(self.send_cec_command, self.cec_command_map)
