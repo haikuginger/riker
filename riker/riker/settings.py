@@ -74,11 +74,17 @@ WSGI_APPLICATION = 'riker.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
+_DEFAULT_DB_ENGINE = 'django.db.backends.sqlite3'
+_DEFAULT_DB_NAME = os.path.join(BASE_DIR, 'db.sqlite3')
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': os.getenv('RIKER_DB_ENGINE', _DEFAULT_DB_ENGINE),
+        'NAME': os.getenv('RIKER_DB_NAME', _DEFAULT_DB_NAME),
+        'USER': os.getenv('RIKER_DB_USERNAME', ''),
+        'PASSWORD': os.getenv('RIKER_DB_PASSWORD', ''),
+        'HOST': os.getenv('RIKER_DB_HOST', ''),
+        'PORT': os.getenv('RIKER_DB_PORT', ''),
     }
 }
 
