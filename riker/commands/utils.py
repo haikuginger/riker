@@ -13,7 +13,7 @@ CEC_CLIENT = None
 
 
 def send_infrared_command(device, command):
-    irsend.send_once(device, command)
+    irsend.send_once(device, [command])
 
 
 def send_serial_command(port, baud, bytesize, timeout, command):
