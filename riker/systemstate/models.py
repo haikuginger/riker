@@ -2,6 +2,12 @@ from logging import getLogger
 
 from django.db import models
 
+from commands.utils import(
+    send_cec_command,
+    send_infrared_command,
+    send_serial_command,
+    send_tcp_command,
+)
 
 LOGGER = getLogger(__name__)
 
@@ -47,7 +53,7 @@ class Command(models.Model):
         max_length=255,
     )
     condition = models.ForeignKey(
-        'State',
+        'Condition',
         related_name='+',
         null=True,
         blank=True,
@@ -55,7 +61,7 @@ class Command(models.Model):
 
     def execute(self):
         handler = self.device.get_handler(self.command_type)
-        if not self.condition or self.condition.is_active():
+        if not self.condition or self.condition.met():
             handler(self.data)
             return list(self.side_effects.all())
     
@@ -65,6 +71,31 @@ class Command(models.Model):
     def __str__(self):
         return self.__repr__()
 
+
+class Condition(models.Model):
+
+    CONDITION_TYPES = [
+        ('any', 'Any'),
+        ('all', 'All'),
+    ]
+
+    condition_type = models.CharField(max_length=3, choices=CONDITION_TYPES)
+    states = models.ManyToManyField('State', related_name='+', null=True, blank=True)
+    nested_conditions = models.ManyToManyField('self',
+        related_name='+',
+        symmetrical=False,
+        null=True,
+        blank=True
+    )
+
+    def met(self):
+        if self.condition_type == 'any':
+            check_method = any
+        else:
+            check_method = all
+        states_met = check_method(x.is_active() for x in self.states.all())
+        nested_conditions_met = check_method(x.met() for x in self.nested_conditions.all())
+        return check_method([states_met, nested_conditions_met])
 
 class StateSet(models.Model):
     name = models.CharField(max_length=255)
@@ -150,6 +181,11 @@ class Device(models.Model):
         null=True,
         blank=True,
     )
+    irsend_config = models.OneToOneField(
+        'IrsendConfig',
+        null=True,
+        blank=True,
+    )
 
     def get_handler(self, command_type):
         return getattr(self, self.command_types[command_type]).handler
@@ -174,6 +210,11 @@ class CecConfig(models.Model):
                 self.target_address,
             )
         )
+        send_cec_command(
+            source_address,
+            target_address,
+            command,
+        )
 
 
 class SerialConfig(models.Model):
@@ -193,6 +234,13 @@ class SerialConfig(models.Model):
                 self.timeout,
             )
         )
+        send_serial_command(
+            self.port_name,
+            self.baud_rate,
+            self.byte_size,
+            self.timeout,
+            command,
+        )
 
 
 class TcpConfig(models.Model):
@@ -208,3 +256,15 @@ class TcpConfig(models.Model):
                 self.port,
             )
         )
+        send_tcp_command(host, port, command)
+
+
+class IrsendConfig(models.Model):
+
+    remote_name = models.CharField(max_length=255)
+
+    def handler(self, command):
+        LOGGER.warning(
+            'Sending IR command "{}" with remote "{}".'.format(command, self.remote_name)
+        )
+        send_infrared_command(self.remote_name, command)

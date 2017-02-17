@@ -2,6 +2,7 @@ from django.contrib import admin
 from systemstate.models import (
     RemoteButton,
     Command,
+    Condition,
     StateSet,
     State,
     StateSideEffect,
@@ -18,6 +19,10 @@ class RemoteButtonAdmin(admin.ModelAdmin):
 
 @admin.register(Command)
 class CommandAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Condition)
+class ConditionAdmin(admin.ModelAdmin):
     pass
 
 class InlineStateAdmin(admin.StackedInline):

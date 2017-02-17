@@ -26,6 +26,7 @@ class LircListener(Thread):
         with tempfile.NamedTemporaryFile(delete=False) as lircrc_file:
             lircrc_file.write(generate_lircrc(self.lirc_name, buttons).encode('ascii'))
             self.lircrc_filename = lircrc_file.name
+        super(LircListener, self).__init__()
 
     def run(self):
         lirc.init(self.lirc_name, self.lircrc_filename)
