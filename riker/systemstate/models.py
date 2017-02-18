@@ -113,11 +113,10 @@ class Condition(models.Model):
     ]
 
     condition_type = models.CharField(max_length=3, choices=CONDITION_TYPES)
-    states = models.ManyToManyField('State', related_name='+', null=True, blank=True)
+    states = models.ManyToManyField('State', related_name='+', blank=True)
     nested_conditions = models.ManyToManyField('self',
         related_name='+',
         symmetrical=False,
-        null=True,
         blank=True
     )
 

@@ -1,7 +1,7 @@
 import tempfile
 from threading import Thread
 
-#import lirc
+import lirc
 from django.conf import settings
 
 from systemstate.models import RemoteButton
