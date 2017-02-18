@@ -27,6 +27,7 @@ def send_serial_command(port, baud, bytesize, timeout, command):
 
 
 def send_cec_command(source, sink, command):
+    nonlocal CEC_CLIENT
     if CEC_CLIENT is None:
         CEC_CLIENT = Popen(
             ['cec-client'],
