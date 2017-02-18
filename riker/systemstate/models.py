@@ -309,7 +309,7 @@ class TcpConfig(models.Model):
                 self.port,
             )
         )
-        send_tcp_command(host, port, command)
+        send_tcp_command(self.host, self.port, command)
 
     def __repr__(self):
         return 'TCP config' +  (' for {}'.format(self.device) if hasattr(self, 'device') else '')
