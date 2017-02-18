@@ -179,11 +179,11 @@ class StateSideEffect(models.Model):
     )
 
     def execute(self):
-        for state in self.states:
+        for state in self.states.all():
             state.activate()
 
     def __repr__(self):
-        return 'Set {} after {}'.format(', '.join(self.states), self.commands)
+        return 'Set {} after {}'.format(', '.join(self.states.all()), self.commands)
 
     def __str__(self):
         return self.__repr__()
