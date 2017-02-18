@@ -245,8 +245,8 @@ class CecConfig(models.Model):
             )
         )
         send_cec_command(
-            source_address,
-            target_address,
+            self.source_address,
+            self.target_address,
             command,
         )
 
