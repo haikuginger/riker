@@ -111,6 +111,7 @@ class Condition(models.Model):
         ('all', 'All'),
     ]
 
+    name = models.CharField(max_length=255)
     condition_type = models.CharField(max_length=3, choices=CONDITION_TYPES)
     states = models.ManyToManyField('State', related_name='+', blank=True)
     nested_conditions = models.ManyToManyField('self',
@@ -127,6 +128,12 @@ class Condition(models.Model):
         states_met = check_method(x.is_active() for x in self.states.all())
         nested_conditions_met = check_method(x.met() for x in self.nested_conditions.all())
         return check_method([states_met, nested_conditions_met])
+
+    def __repr__(self):
+        return self.name
+
+    def __str__(self):
+        return self.__repr__()
 
 
 class StateSet(models.Model):

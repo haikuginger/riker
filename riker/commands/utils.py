@@ -27,14 +27,14 @@ def send_serial_command(port, baud, bytesize, timeout, command):
 
 
 def send_cec_command(source, sink, command):
-    nonlocal CEC_CLIENT
+    global CEC_CLIENT
     if CEC_CLIENT is None:
         CEC_CLIENT = Popen(
             ['cec-client'],
             stdin=PIPE,
             stdout=PIPE,
             stderr=PIPE,
-            buffsize=1,
+            bufsize=1,
             universal_newlines=True,
         )
     full_command = 'tx {source}{sink}:44:{command} \n tx {source}{sink}:45 \n'.format(
