@@ -183,7 +183,7 @@ class StateSideEffect(models.Model):
             state.activate()
 
     def __repr__(self):
-        return 'Set {} after {}'.format(', '.join(self.states.all()), self.commands)
+        return 'Set {} after {}'.format(', '.join(str(x) for x in self.states.all()), self.commands)
 
     def __str__(self):
         return self.__repr__()
