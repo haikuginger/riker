@@ -251,7 +251,7 @@ class CecConfig(models.Model):
         )
 
     def __repr__(self):
-        return 'CEC config' +  'for {}'.format(self.device) if hasattr(self, device) else ''
+        return 'CEC config' +  'for {}'.format(self.device) if hasattr(self, 'device') else ''
 
     def __str__(self):
         return self.__repr__()
@@ -283,7 +283,7 @@ class SerialConfig(models.Model):
         )
 
     def __repr__(self):
-        return 'Serial config' +  'for {}'.format(self.device) if hasattr(self, device) else ''
+        return 'Serial config' +  'for {}'.format(self.device) if hasattr(self, 'device') else ''
 
     def __str__(self):
         return self.__repr__()
@@ -305,7 +305,7 @@ class TcpConfig(models.Model):
         send_tcp_command(host, port, command)
 
     def __repr__(self):
-        return 'TCP config' +  'for {}'.format(self.device) if hasattr(self, device) else ''
+        return 'TCP config' +  'for {}'.format(self.device) if hasattr(self, 'device') else ''
 
     def __str__(self):
         return self.__repr__()
@@ -322,7 +322,7 @@ class IrsendConfig(models.Model):
         send_infrared_command(self.remote_name, command)
 
     def __repr__(self):
-        return 'Infrared config' +  'for {}'.format(self.device) if hasattr(self, device) else ''
+        return 'Infrared config' +  'for {}'.format(self.device) if hasattr(self, 'device') else ''
 
     def __str__(self):
         return self.__repr__()
