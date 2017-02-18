@@ -1,3 +1,4 @@
+from logging import getLogger
 import tempfile
 from threading import Thread
 
@@ -6,6 +7,9 @@ from django.conf import settings
 
 from systemstate.models import RemoteButton
 from systemstate.utils import push_button
+
+
+LOGGER = getLogger(__name__)
 
 
 LIRCRC_TEMPLATE = '''
@@ -35,6 +39,7 @@ def listen(lirc_name, lircrc_filename, callback=None):
     callback = callback or push_button
     while True:
         for key_code in lirc.nextcode():
+            LOGGER.warning(key_code)
             callback(key_code)
 
 
