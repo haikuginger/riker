@@ -64,7 +64,6 @@ class Command(models.Model):
         handler = self.device.get_handler(self.command_type)
         if not self.condition or self.condition.met():
             handler(self.data)
-            return list(self.side_effects.all())
 
     def __repr__(self):
         return '{} command {} triggered by {}'.format(self.command_type, self.data, self.trigger)
@@ -90,16 +89,13 @@ class CommandSet(models.Model):
     )
 
     def execute(self):
-        effects = []
         if hasattr(self, 'condition') and not self.condition.met():
             LOGGER.warning('Conditions for {} were not met.'.format(self))
-            return effects
+            return None
         for command in self.commands.all():
             LOGGER.warning('Conditions for {} were met. Executing command {}.'.format(self, command))
-            side_effects = command.execute()
-            if side_effects is not None:
-                effects += side_effects
-        return effects
+            command.execute()
+        return list(self.side_effects.all())
 
     def __repr__(self):
         return self.name
@@ -183,7 +179,8 @@ class StateSideEffect(models.Model):
     )
 
     def execute(self):
-        self.state.activate()
+        for state in self.states:
+            state.activate()
 
     def __repr__(self):
         return 'Set {} after {}'.format(', '.join(self.states), self.commands)
