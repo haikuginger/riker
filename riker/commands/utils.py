@@ -21,8 +21,8 @@ def send_serial_command(port, baud, bytesize, timeout, command):
         ser = SERIAL_CONNECTIONS.pop((port, baud, bytesize, timeout,))
     except KeyError:
         ser = serial.Serial(port, baudrate=baud, bytesize=bytesize, timeout=timeout)
-    bytes = binascii.unhexlify(command)
-    ser.write(command)
+    bytecommand = binascii.unhexlify(command)
+    ser.write(bytecommand)
     SERIAL_CONNECTIONS[(port, baud, bytesize, timeout,)] = ser
 
 
