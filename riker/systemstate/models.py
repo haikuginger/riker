@@ -89,7 +89,7 @@ class CommandSet(models.Model):
     )
 
     def execute(self):
-        if hasattr(self, 'condition') and not self.condition.met():
+        if self.condition is not None and not self.condition.met():
             LOGGER.warning('Conditions for {} were not met.'.format(self))
             return None
         for command in self.commands.all():
