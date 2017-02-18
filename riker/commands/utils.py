@@ -46,17 +46,17 @@ def send_cec_command(source, sink, command):
 
 
 def send_tcp_command(host, port, command, retries=5):
-    command = (command + '\r\n').encode('ascii')
+    encoded_command = (command + '\r\n').encode('ascii')
     try:
         conn = TCP_CONNECTIONS.pop((host, port,))
     except KeyError:
         conn = socket.socket()
         conn.connect((host, port))
     try:
-        conn.send(command)
+        conn.send(encoded_command)
     except BrokenPipeError:
         if retries:
-            return send_tcp_command(host, port, command, retries-1)
+            return send_tcp_command(host, port, command, retries=retries-1)
         else:
             raise
     TCP_CONNECTIONS[(host, port)] = conn
