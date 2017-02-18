@@ -21,6 +21,7 @@ class RemoteButton(models.Model):
 
     def execute(self):
         effects = []
+        LOGGER.warning('Executing macros: {}'.format(self.macros.all()))
         for command in self.macros.all():
             side_effects = command.execute()
             if side_effects is not None:
@@ -90,9 +91,11 @@ class CommandSet(models.Model):
 
     def execute(self):
         effects = []
-        if self.condition and not self.condition.met():
+        if hasattr(self, 'condition') and not self.condition.met():
+            LOGGER.warning('Conditions for {} were not met.'.format(self))
             return effects
         for command in self.commands.all():
+            LOGGER.warning('Conditions for {} were met. Executing command {}.'.format(self, command))
             side_effects = command.execute()
             if side_effects is not None:
                 effects += side_effects

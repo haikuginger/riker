@@ -10,4 +10,5 @@ def push_button(code):
     except RemoteButton.DoesNotExist:
         LOGGER.warning('Did not find handler for remote button with code {}.'.format(code))
     else:
+        LOGGER.warning('Executing command for button: {}'.format(button))
         button.execute()
