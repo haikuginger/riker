@@ -25,7 +25,12 @@ SECRET_KEY = '(p2hqk^=x9t6rvks!s2%#$kl5tb70+del&mgq9rhx!o3!pr!^='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+RIKER_ALLOWED_HOST = os.getenv('RIKER_ALLOWED_HOST', None)
+
+if RIKER_ALLOWED_HOST is not None:
+    ALLOWED_HOSTS = [RIKER_ALLOWED_HOST]
+else:
+    ALLOWED_HOSTS = []
 
 
 # Application definition

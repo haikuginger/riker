@@ -21,7 +21,7 @@ class RemoteButton(models.Model):
 
     def execute(self):
         effects = []
-        for command in self.commands.all():
+        for command in self.macros.all():
             side_effects = command.execute()
             if side_effects is not None:
                 effects += side_effects
@@ -41,15 +41,10 @@ class Command(models.Model):
         related_name='commands'
     )
     trigger = models.ForeignKey(
-        'RemoteButton',
+        'CommandSet',
         related_name='commands'
     )
     command_type = models.CharField(
-        max_length=255,
-    )
-    data = models.CharField(
-        null=True,
-        blank=True,
         max_length=255,
     )
     condition = models.ForeignKey(
@@ -58,15 +53,53 @@ class Command(models.Model):
         null=True,
         blank=True,
     )
+    data = models.CharField(
+        null=True,
+        blank=True,
+        max_length=255,
+    )
 
     def execute(self):
         handler = self.device.get_handler(self.command_type)
         if not self.condition or self.condition.met():
             handler(self.data)
             return list(self.side_effects.all())
-    
+
     def __repr__(self):
         return '{} command {} triggered by {}'.format(self.command_type, self.data, self.trigger)
+
+    def __str__(self):
+        return self.__repr__()
+
+
+class CommandSet(models.Model):
+
+    name = models.CharField(max_length=255)
+
+    trigger = models.ForeignKey(
+        'RemoteButton',
+        related_name='macros'
+    )
+
+    condition = models.ForeignKey(
+        'Condition',
+        related_name='+',
+        null=True,
+        blank=True,
+    )
+
+    def execute(self):
+        effects = []
+        if self.condition and not self.condition.met():
+            return effects
+        for command in self.commands.all():
+            side_effects = command.execute()
+            if side_effects is not None:
+                effects += side_effects
+        return effects
+
+    def __repr__(self):
+        return self.name
 
     def __str__(self):
         return self.__repr__()
@@ -96,6 +129,7 @@ class Condition(models.Model):
         states_met = check_method(x.is_active() for x in self.states.all())
         nested_conditions_met = check_method(x.met() for x in self.nested_conditions.all())
         return check_method([states_met, nested_conditions_met])
+
 
 class StateSet(models.Model):
     name = models.CharField(max_length=255)
@@ -137,11 +171,11 @@ class State(models.Model):
 
 
 class StateSideEffect(models.Model):
-    command = models.ForeignKey(
-        'Command',
+    commands = models.ForeignKey(
+        'CommandSet',
         related_name='side_effects',
     )
-    state = models.ForeignKey(
+    states = models.ManyToManyField(
         'State',
         related_name='reachable_by'
     )
@@ -161,6 +195,7 @@ class Device(models.Model):
         'cec': 'cec_config',
         'tcp': 'tcp_config',
         'serial': 'serial_config',
+        'infrared': 'irsend_config',
     }
 
     name = models.CharField(
@@ -216,6 +251,12 @@ class CecConfig(models.Model):
             command,
         )
 
+    def __repr__(self):
+        return 'CEC config for {}'.format(self.device)
+
+    def __str__(self):
+        return self.__repr__()
+
 
 class SerialConfig(models.Model):
 
@@ -242,6 +283,12 @@ class SerialConfig(models.Model):
             command,
         )
 
+    def __repr__(self):
+        return 'Serial config for {}'.format(self.device)
+
+    def __str__(self):
+        return self.__repr__()
+
 
 class TcpConfig(models.Model):
 
@@ -258,6 +305,12 @@ class TcpConfig(models.Model):
         )
         send_tcp_command(host, port, command)
 
+    def __repr__(self):
+        return 'TCP config for {}'.format(self.device)
+
+    def __str__(self):
+        return self.__repr__()
+
 
 class IrsendConfig(models.Model):
 
@@ -268,3 +321,9 @@ class IrsendConfig(models.Model):
             'Sending IR command "{}" with remote "{}".'.format(command, self.remote_name)
         )
         send_infrared_command(self.remote_name, command)
+
+    def __repr__(self):
+        return 'Infrared config for {}'.format(self.device)
+
+    def __str__(self):
+        return self.__repr__()
