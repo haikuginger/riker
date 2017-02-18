@@ -6,5 +6,5 @@ class Command(BaseCommand):
 
     def handle(*args, **options):
         name = 'riker'
-        fname = createlircrc_tempfile(name)
+        fname = create_lircrc_tempfile(name)
         listen(name, fname)
