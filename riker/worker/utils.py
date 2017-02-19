@@ -17,6 +17,8 @@ begin
         prog   = {lirc_name}
         button = {key_name}
         config = {key_name}
+        repeat = 2
+        delay = 3
 end
 
 '''
