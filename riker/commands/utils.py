@@ -1,6 +1,7 @@
 import binascii
 import socket
 from subprocess import Popen, PIPE, STDOUT
+from time import sleep
 
 import serial
 from py_irsend import irsend
@@ -32,11 +33,10 @@ def send_cec_command(source, sink, command):
         CEC_CLIENT = Popen(
             ['cec-client'],
             stdin=PIPE,
-            stdout=PIPE,
-            stderr=PIPE,
             bufsize=1,
             universal_newlines=True,
         )
+        sleep(15)  # Wait for cec-client to be ready to receive commands
     full_command = 'tx {source}{sink}:44:{command} \n tx {source}{sink}:45 \n'.format(
         source=source,
         sink=sink,
