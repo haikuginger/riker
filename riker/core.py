@@ -79,7 +79,7 @@ class BaseRiker(object):
     def get_action_for_command(self, command):
         action_type = command['type']
         handler = self.command_handlers[action_type]
-        device_config = self.get_device_config(command.get('device_id'), action_type)
+        device_config = self.get_device_config(command.get('device'), action_type)
         handler = partial(handler, *device_config.get('args', []), **device_config.get('kwargs', {}))
         return partial(handler, *command.get('args', []), **command.get('kwargs', {}))
 
