@@ -20,17 +20,17 @@ CEC_CLIENT = Popen(
 
 class BaseCommandHandler(object):
 
-    def __init__(self, *args, **kwargs):
+    def set_default_handlers(self):
         if not hasattr(self, 'command_handlers'):
             self.command_handlers = {}
-        super(BaseCommandHandler, self).__init__(*args, **kwargs)
 
 
 class InfraredMixin(BaseCommandHandler):
     
     def __init__(self, *args, **kwargs):
-        super(InfraredMixin, self).__init__(*args, **kwargs)
+        self.set_default_handlers()
         self.command_handlers['infrared'] = self.send_infrared_command
+        super(InfraredMixin, self).__init__(*args, **kwargs)
 
     def send_infrared_command(device, command):
         irsend.send_once(device, [command])
@@ -39,8 +39,9 @@ class InfraredMixin(BaseCommandHandler):
 class SerialMixin(BaseCommandHandler):
 
     def __init__(self, *args, **kwargs):
-        super(SerialMixin, self).__init__(*args, **kwargs)
+        self.set_default_handlers()
         self.command_handlers['serial'] = self.send_serial_command
+        super(SerialMixin, self).__init__(*args, **kwargs)
 
     def send_serial_command(port, baud, bytesize, timeout, command):
         try:
@@ -55,8 +56,9 @@ class SerialMixin(BaseCommandHandler):
 class CecMixin(BaseCommandHandler):
 
     def __init__(self, *args, **kwargs):
-        super(CecMixin, self).__init__(*args, **kwargs)
+        self.set_default_handlers()
         self.command_handlers['cec'] = self.send_cec_command
+        super(CecMixin, self).__init__(*args, **kwargs)
 
     def send_cec_command(source, sink, command):
         full_command = 'tx {source}{sink}:44:{command} \n tx {source}{sink}:45 \n'.format(
@@ -70,8 +72,9 @@ class CecMixin(BaseCommandHandler):
 class TcpMixin(BaseCommandHandler):
 
     def __init__(self, *args, **kwargs):
-        super(TcpMixin, self).__init__(*args, **kwargs)
+        self.set_default_handlers()
         self.command_handlers['tcp'] = self.send_tcp_command
+        super(TcpMixin, self).__init__(*args, **kwargs)
 
     def send_tcp_command(host, port, command, retries=5):
         encoded_command = (command + '\r\n').encode('ascii')
