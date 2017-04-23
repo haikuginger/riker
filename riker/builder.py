@@ -163,7 +163,7 @@ def get_buttons(commands):
         if not button_name:
             break
         button = new_item(button_name)
-        button['type'] = pick_one('What type of button is "{}"?'.format(button_name), BUTTON_TYPES)
+        button['type'] = pick_one('What type of button is "{}"?'.format(button_name), BUTTON_TYPES)['id']
         button['code'] = input(
             'What code or ID does {} send the "{}" button with? '.format(
                 button['type'],

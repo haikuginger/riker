@@ -1,4 +1,8 @@
 import lirc
+import tempfile
+from logging import getLogger
+
+LOGGER = getLogger(__name__)
 
 LIRCRC_TEMPLATE = '''
 begin
