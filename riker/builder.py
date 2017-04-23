@@ -135,9 +135,9 @@ def get_commands(devices, state_sets, states):
         condition_name = ' AND '.join(x['name'] for x in prerequisites)
         condition = new_item(condition_name)
         condition['required_states'] = [x['id'] for x in prerequisites]
-        command['condition'] = condition
+        command['condition'] = condition['id']
         conditions.append(condition)
-        command['device'] = pick_one('What device is it performed on?', devices)
+        command['device'] = pick_one('What device is it performed on?', devices)['id']
         command['type'] = pick_one('What type of command is it?', COMMAND_TYPES)['id']
         arguments = input("What necessary arguments are there? ")
         try:
