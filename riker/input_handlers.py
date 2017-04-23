@@ -22,7 +22,7 @@ def generate_lircrc(name, buttons):
 class LircInputHandlerMixin(object):
 
     def __init__(self, lirc_name=None, **kwargs):
-        super(LircRiker, self).__init__(**kwargs)
+        super(LircInputHandlerMixin, self).__init__(**kwargs)
         self.lirc_name = lirc_name or 'riker'
         self.lircrc_filename = self.generate_lircrc_tempfile()
 

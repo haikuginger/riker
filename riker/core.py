@@ -26,6 +26,7 @@ class BaseRiker(object):
         self.buttons = {
             (button['type'], button['code']): self.process_button(button) for button in config.get('buttons', [])
         }
+        self.command_handlers = []
 
     def get_by_id(self, config_key, item_id):
         items = self.config.get(config_key)
@@ -78,7 +79,7 @@ class BaseRiker(object):
 
     def get_action_for_command(command):
         action_type = command['type']
-        handler = self.command_handleers[action_type]
+        handler = self.command_handlers[action_type]
         device_config = self.get_device_config(command.get('device_id'), action_type)
         return partial(handler, *command.get('args', []), **command.get('kwargs', {}))
 
