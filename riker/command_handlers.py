@@ -32,7 +32,7 @@ class InfraredMixin(BaseCommandHandler):
         self.command_handlers['infrared'] = self.send_infrared_command
         super(InfraredMixin, self).__init__(*args, **kwargs)
 
-    def send_infrared_command(device=None, command=None):
+    def send_infrared_command(self, device, command):
         irsend.send_once(device, [command])
 
 
@@ -43,7 +43,7 @@ class SerialMixin(BaseCommandHandler):
         self.command_handlers['serial'] = self.send_serial_command
         super(SerialMixin, self).__init__(*args, **kwargs)
 
-    def send_serial_command(port=None, baud=None, bytesize=None, timeout=None, command=None):
+    def send_serial_command(self, port, baud, bytesize, timeout, command):
         try:
             ser = SERIAL_CONNECTIONS.pop((port, baud, bytesize, timeout,))
         except KeyError:
@@ -60,7 +60,7 @@ class CecMixin(BaseCommandHandler):
         self.command_handlers['cec'] = self.send_cec_command
         super(CecMixin, self).__init__(*args, **kwargs)
 
-    def send_cec_command(source=None, sink=None, command=None):
+    def send_cec_command(self, source, sink, command):
         full_command = 'tx {source}{sink}:44:{command} \n tx {source}{sink}:45 \n'.format(
             source=source,
             sink=sink,
@@ -76,7 +76,7 @@ class TcpMixin(BaseCommandHandler):
         self.command_handlers['tcp'] = self.send_tcp_command
         super(TcpMixin, self).__init__(*args, **kwargs)
 
-    def send_tcp_command(host=None, port=None, command=None, retries=5):
+    def send_tcp_command(self, host, port, command, retries=5):
         encoded_command = (command + '\r\n').encode('ascii')
         try:
             conn = TCP_CONNECTIONS.pop((host, port,))
