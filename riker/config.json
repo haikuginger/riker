@@ -1,0 +1,127 @@
+{
+    "states": [
+        {
+            "set": "dbe3ab483dc849f89d704c6f8ba0a1b6", 
+            "name": "TV power on", 
+            "id": "8f247025279146108831bcb23c3fbe60"
+        }, 
+        {
+            "set": "dbe3ab483dc849f89d704c6f8ba0a1b6", 
+            "name": "TV power off", 
+            "id": "d409f5645fb14ef1a310a70776bf93e4"
+        }
+    ], 
+    "commands": [
+        {
+            "name": "Turn TV on", 
+            "side_effects": [
+                "8f247025279146108831bcb23c3fbe60"
+            ], 
+            "args": [], 
+            "kwargs": {
+                "command": "082200000002d6"
+            }, 
+            "device": {
+                "serial": {
+                    "baud": 9600, 
+                    "bytesize": 8, 
+                    "port": "/dev/ttyUSB0", 
+                    "timeout": 3
+                }, 
+                "name": "Samsung TV", 
+                "id": "00b4077aefbf43f08ac7bc96e8ee0b7b"
+            }, 
+            "type": "serial", 
+            "id": "194fed76d4da4b58857392eca87aea15", 
+            "condition": {
+                "required_states": [
+                    "d409f5645fb14ef1a310a70776bf93e4"
+                ], 
+                "name": "TV power off", 
+                "id": "67b1d2451b4042be82b7567dc63a70e0"
+            }
+        }, 
+        {
+            "name": "Turn TV off", 
+            "side_effects": [
+                "d409f5645fb14ef1a310a70776bf93e4"
+            ], 
+            "args": [], 
+            "kwargs": {
+                "command": "082200000001d5"
+            }, 
+            "device": {
+                "serial": {
+                    "baud": 9600, 
+                    "bytesize": 8, 
+                    "port": "/dev/ttyUSB0", 
+                    "timeout": 3
+                }, 
+                "name": "Samsung TV", 
+                "id": "00b4077aefbf43f08ac7bc96e8ee0b7b"
+            }, 
+            "type": "serial", 
+            "id": "ac06fe44d07a41a6962779218b54744c", 
+            "condition": {
+                "required_states": [
+                    "8f247025279146108831bcb23c3fbe60"
+                ], 
+                "name": "TV power on", 
+                "id": "3c219bf945fc4fe59d5d72ab948ff6ea"
+            }
+        }
+    ], 
+    "devices": [
+        {
+            "serial": {
+                "baud": 9600, 
+                "bytesize": 8, 
+                "port": "/dev/ttyUSB0", 
+                "timeout": 3
+            }, 
+            "name": "Samsung TV", 
+            "id": "00b4077aefbf43f08ac7bc96e8ee0b7b"
+        }
+    ], 
+    "buttons": [
+        {
+            "commands": [
+                "194fed76d4da4b58857392eca87aea15", 
+                "ac06fe44d07a41a6962779218b54744c"
+            ], 
+            "code": "KEY_HOME", 
+            "type": {
+                "name": "Lirc", 
+                "id": "lirc"
+            }, 
+            "name": "Xbox button", 
+            "id": "8eaf85f7b84946678979981e88c9fe7d"
+        }
+    ], 
+    "conditions": [
+        {
+            "required_states": [
+                "d409f5645fb14ef1a310a70776bf93e4"
+            ], 
+            "name": "TV power off", 
+            "id": "67b1d2451b4042be82b7567dc63a70e0"
+        }, 
+        {
+            "required_states": [
+                "8f247025279146108831bcb23c3fbe60"
+            ], 
+            "name": "TV power on", 
+            "id": "3c219bf945fc4fe59d5d72ab948ff6ea"
+        }
+    ], 
+    "state_sets": [
+        {
+            "states": [
+                "8f247025279146108831bcb23c3fbe60", 
+                "d409f5645fb14ef1a310a70776bf93e4"
+            ], 
+            "name": "TV power", 
+            "id": "dbe3ab483dc849f89d704c6f8ba0a1b6"
+        }
+    ]
+}
