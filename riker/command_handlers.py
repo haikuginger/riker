@@ -87,7 +87,7 @@ class TcpMixin(BaseCommandHandler):
             conn.send(encoded_command)
         except BrokenPipeError:
             if retries:
-                return send_tcp_command(host, port, command, retries=retries-1)
+                return self.send_tcp_command(host, port, command, retries=retries-1)
             else:
                 raise
         TCP_CONNECTIONS[(host, port)] = conn

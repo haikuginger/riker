@@ -11,7 +11,7 @@
 #     What do you want to do?
 #     What sort of command does that take?
 #     What parameters need to be passed to that command?
-#         - Input as JSON: {"args": [], "kwargs": {}}
+#         - Input as JSON
 #     What needs to be the case for this command to happen?
 #         - Loop, getting individual states, eliminating contradictory states
 #     What state changes happen as a result of this command?
@@ -42,22 +42,31 @@ BUTTON_TYPES = {
     'Lirc': 'lirc'
 }
 
+class InterruptedConfig(Exception):
+
+    def __init__(self, *args, **kwargs):
+        self.incomplete_config = kwargs.pop('incomplete_config', {})
+        super(InterruptedConfig, self).__init__(*args, **kwargs)
+
+
 def new_item(name):
     return {
         "name": name,
         "id": uuid4().hex
     }
 
-def pick_one(message, items, return_quickly=True):
+def pick_one(message, items, return_quickly=True, require=False):
     if isinstance(items, dict):
         items = [{'name': key, 'id': value} for key, value in items.items()]
     items = list(items)
-    if len(items) == 1:
+    if len(items) == 1 and return_quickly:
         return items[0]
     print(message)
     choice = input('\n'.join('{}. {}'.format(i+1, item['name']) for i, item in enumerate(items)) + '\n')
-    if not choice:
+    if not choice and not require:
         return None
+    elif not choice:
+        return pick_one(message, items, return_quickly=return_quickly, require=require)
     choice = int(choice) - 1
     return items[choice]
 
@@ -65,7 +74,7 @@ def pick_compatible_states(message, state_sets, states):
     state_sets = deepcopy(state_sets)
     states = deepcopy(states)
     chosen_states = []
-    while True:
+    while True and states:
         state_choice = pick_one(message, states)
         if not state_choice:
             break
@@ -76,7 +85,7 @@ def pick_compatible_states(message, state_sets, states):
 
 def pick_many(message, items):
     picked = []
-    while True:
+    while True and items:
         item = pick_one(message, items, return_quickly=False)
         if not item:
             break
@@ -137,16 +146,14 @@ def get_commands(devices, state_sets, states):
         condition['required_states'] = [x['id'] for x in prerequisites]
         command['condition'] = condition['id']
         conditions.append(condition)
-        command['device'] = pick_one('What device is it performed on?', devices)['id']
-        command['type'] = pick_one('What type of command is it?', COMMAND_TYPES)['id']
+        command['device'] = pick_one('What device is it performed on?', devices, require=True)['id']
+        command['type'] = pick_one('What type of command is it?', COMMAND_TYPES, require=True)['id']
         arguments = input("What necessary arguments are there? ")
         try:
             arguments = json.loads(arguments)
         except Exception:
-            pass
-        else:
-            command['args'] = arguments.get('args', [])
-            command['kwargs'] = arguments.get('kwargs', {})
+            arguments = {"command": arguments}
+        command['kwargs'] = arguments
         side_effects = pick_compatible_states(
             'What states happen as a result of this command?',
             state_sets,
@@ -163,7 +170,7 @@ def get_buttons(commands):
         if not button_name:
             break
         button = new_item(button_name)
-        button['type'] = pick_one('What type of button is "{}"?'.format(button_name), BUTTON_TYPES)['id']
+        button['type'] = pick_one('What type of button is "{}"?'.format(button_name), BUTTON_TYPES, require=True)['id']
         button['code'] = input(
             'What code or ID does {} send the "{}" button with? '.format(
                 button['type'],
@@ -175,22 +182,45 @@ def get_buttons(commands):
         buttons.append(button)
     return buttons
 
-def run():
-    devices = get_devices()
-    state_sets, states = get_states()
-    commands, conditions = get_commands(devices, state_sets, states)
-    buttons = get_buttons(commands)
-    result = {
-        'buttons': buttons,
-        'conditions': conditions,
-        'commands': commands,
-        'state_sets': state_sets,
-        'states': states,
-        'devices': devices,
-    }
-    print(result)
-    return result
+def update_child(config, child_name, to_update):
+    config.setdefault(child_name, [])
+    config[child_name] += to_update
+
+def run(existing_config=None):
+    config = existing_config.copy() or {}
+    try:
+        update_child(config, 'devices', get_devices())
+        state_sets, states = get_states()
+        update_child(config, 'state_sets', state_sets)
+        update_child(config, 'states', states)
+        commands, conditions = get_commands(
+            config['devices'],
+            config['state_sets'],
+            config['states']
+        )
+        update_child(config, 'commands', commands)
+        update_child(config, 'conditions', conditions)
+        update_child(config, 'buttons', get_buttons(config['commands']))
+        print(config)
+        return config
+    except:
+        raise InterruptedConfig('Could not complete configuration', incomplete_config=config)
 
 if __name__ == '__main__':
-    with open('config.json', 'w') as configfile:
-        configfile.write(json.dumps(run(), indent=4))
+    try:
+        with open('draft_config.json', 'r') as existing_config:
+            config = json.load(existing_config)
+            print('Successfully loaded draft configuration...')
+    except Exception:
+        config = {}
+
+    try:
+        final_config = run(config)
+        with open('config.json', 'w') as configfile:
+            configfile.write(json.dumps(final_config, indent=4))
+    except InterruptedConfig as err:
+        print('Configuration failed; dumping state...')
+        with open('draft_config.json', 'w') as configfile:
+            configfile.write(json.dumps(err.incomplete_config, indent=4))
+
+
