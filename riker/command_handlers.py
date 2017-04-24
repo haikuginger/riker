@@ -82,7 +82,12 @@ class TcpMixin(BaseCommandHandler):
             conn = TCP_CONNECTIONS.pop((host, port,))
         except KeyError:
             conn = socket.socket()
-            conn.connect((host, port))
+            try:
+                conn.connect((host, port))
+            except OSError:
+                # Couldn't connect. We obviously expect to be able to connect to
+                # something we can't; a state mismatch.
+                return
         try:
             conn.send(encoded_command)
         except BrokenPipeError:
