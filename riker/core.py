@@ -77,12 +77,17 @@ class BaseRiker(object):
             return run_command
 
     def get_action_for_command(self, command):
+        def repeat(handler_action, times):
+            for i in range(times):
+                val = handler_action()
+            return val
         action_type = command['type']
         handler = self.command_handlers[action_type]
         device_config = self.get_device_config(command.get('device'), action_type)
         params = device_config.copy()
         params.update(**command.get('kwargs', {}))
-        return partial(handler, **params)
+        final_handler = partial(handler, **params)
+        return partial(repeat, final_handler, command.get('repeat', 1))
 
     def get_device_config(self, device_id, config_type):
         device = self.get_by_id('devices', device_id) or {}
